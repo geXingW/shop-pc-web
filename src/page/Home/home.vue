@@ -6,18 +6,69 @@
       <div class="bg" ref="bg"
         @mouseover="bgOver($refs.bg)" @mousemove="bgMove($refs.bg,$event)" @mouseout="bgOut($refs.bg)">
         <transition name="fade">
-          <div v-for="(item, i) in banner" v-if="i===mark" :key="i" style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
-            <img v-if="item.picUrl" class="img1" :src="item.picUrl"/>
-            <img v-if="item.picUrl2"  class="img2 a" :src="item.picUrl2"/>
-            <img v-if="item.picUrl3"  class="img3 b" :src="item.picUrl3"/>
+          <div v-for="(item, i) in banners" v-if="i===mark" :key="i" style="position:absolute" @click="linkTo(item, 'banner')" @mouseover="stopTimer" @mouseout="startTimer">
+            <img class="img1" :src="item.pic"/>
           </div>
         </transition>
       </div>
       <div class="page">
         <ul class="dots">
-          <li class="dot-active" v-for="(item, i) in banner" :class="{ 'dot':i!=mark }" :key="i" @click="change(i)"></li>
+          <li class="dot-active" v-for="(item, i) in banners" :class="{ 'dot':i!=mark }" :key="i" @click="change(i)"></li>
         </ul>
       </div>
+    </div>
+
+    <!-- 活动 -->
+    <div v-if="recommends.length > 0">
+      <div class="activity-panel">
+        <ul class="box">
+          <li class="content" v-for="(item,i) in recommends" :key="i" @click="linkTo(item, 'activty')">
+            <img class="i" :src="item.pic || '/static/images/error.png'">
+            <a class="cover-link"></a>
+          </li>
+        </ul>
+      </div>    
+    </div>
+
+    <!-- 精品推荐 -->
+    <div v-if="recommends.length > 0">
+      <section class="w mt30 clearfix">
+        <y-shelf title="精品推荐">
+          <div slot="content" class="floors" >
+            <div class="imgbanner" v-for="(item,i) in recommends" :key="i" @click="linkTo(iitem)" v-if="i==0">
+              <img v-lazy="item.pic">
+              <a class="cover-link"></a>
+            </div>
+            <mall-goods :msg="item" v-for="(item,i) in recommends" :key="i" v-if="i!=0"></mall-goods>
+          </div>
+        </y-shelf>
+      </section>    
+    </div>
+
+    <!-- 新品推荐 -->
+    <div v-if="newProducts.length > 0">
+      <section class="w mt30 clearfix">
+        <y-shelf title="新品推荐">
+          <div slot="content" class="floors" >
+            <div class="imgbanner" v-for="(item,i) in newProducts" :key="i" @click="linkTo(iitem)" v-if="i==0">
+              <img v-lazy="item.pic">
+              <a class="cover-link"></a>
+            </div>
+            <mall-goods :msg="item" v-for="(item,i) in newProducts" :key="i" v-if="i!=0"></mall-goods>
+          </div>
+        </y-shelf>
+      </section>  
+    </div>
+
+    <!-- 热门商品 -->
+    <div v-if="hotProducts.length > 0">
+      <section class="w mt30 clearfix">
+        <y-shelf title="热门商品">
+          <div slot="content" class="floors" >
+            <mall-goods :msg="item" v-for="(item,i) in hotProducts" :key="i"></mall-goods>
+          </div>
+        </y-shelf>
+      </section>    
     </div>
 
     <div v-for="(item,i) in home" :key="i">
@@ -75,6 +126,7 @@
 </template>
 <script>
   import { productHome } from '/api/index.js'
+  import { getBanner, getRecommend, getHot, getNew } from '/api/home.js'
   import YShelf from '/components/shelf'
   import product from '/components/product'
   import mallGoods from '/components/mallGoods'
@@ -83,7 +135,11 @@
     data () {
       return {
         error: false,
-        banner: [],
+        banners: [],
+        activties: [],
+        recommends: [],
+        hotProducts: [],
+        newProducts: [],
         mark: 0,
         bgOpt: {
           px: 0,
@@ -101,7 +157,7 @@
     methods: {
       autoPlay () {
         this.mark++
-        if (this.mark > this.banner.length - 1) {
+        if (this.mark > this.banners.length - 1) {
           // 当遍历到最后一张图片置零
           this.mark = 0
         }
@@ -119,19 +175,24 @@
       stopTimer () {
         clearInterval(this.timer)
       },
-      linkTo (item) {
-        if (item.type === 0 || item.type === 2) {
-          // 关联商品
-          this.$router.push({
-            path: '/goodsDetails',
-            query: {
-              productId: item.productId
-            }
-          })
-        } else {
+      linkTo (item, type) {
+        if(type == 'banner') {
           // 完整链接
-          window.location.href = item.fullUrl
+          window.location.href = item.fullUrl  
         }
+
+        // if (item.type === 0 || item.type === 2) {
+        //   // 关联商品
+        //   this.$router.push({
+        //     path: '/goodsDetails',
+        //     query: {
+        //       productId: item.productId
+        //     }
+        //   })
+        // } else {
+        //   // 完整链接
+        //   window.location.href = item.fullUrl
+        // }
       },
       bgOver (e) {
         this.bgOpt.px = e.offsetLeft
@@ -170,20 +231,42 @@
       }
     },
     mounted () {
-      productHome().then(res => {
-        if (res.success === false) {
-          this.error = true
-          return
-        }
-        let data = res.result
-        this.home = data
-        this.loading = false
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].type === 0) {
-            this.banner = data[i].panelContents
-          }
-        }
+      getBanner().then(( data ) => {
+        if(data.status == 200000){
+          this.banners = data.data  
+        } 
       })
+      getRecommend().then(( data ) => {
+        if(data.status == 200000){
+          this.activties = data.data.slice(0, 3)
+          this.recommends = data.data        
+        }
+      }),
+      getHot().then(( data ) => {
+        if(data.status == 200000){
+          this.loading = false
+          this.hotProducts = data.data
+        }
+      }),
+      getNew().then(( data ) => {
+        if(data.status == 200000){
+          this.newProducts = data.data
+        }
+      }),
+      // productHome().then(res => {
+      //   if (res.success === false) {
+      //     this.error = true
+      //     return
+      //   }
+      //   let data = res.result
+      //   this.home = data
+      //   this.loading = false
+      //   // for (let i = 0; i < data.length; i++) {
+      //   //   if (data[i].type === 0) {
+      //   //     this.banner = data[i].panelContents
+      //   //   }
+      //   // }
+      // })
       this.showNotify()
     },
     created () {

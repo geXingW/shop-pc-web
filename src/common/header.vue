@@ -135,9 +135,9 @@
                 <li>
                   <a @click="changGoods(-2)" :class="{active:choosePage===-2}">全部</a>
                 </li>
-                <li v-for="(item,i) in navList" :key="i">
+<!--                 <li v-for="(item,i) in navList" :key="i">
                   <a @click="changGoods(i, item)" :class="{active:i===choosePage}">{{item.picUrl}}</a>
-                </li>
+                </li> -->
               </ul>
               <div></div>
             </div>
@@ -361,20 +361,21 @@
       openProduct (productId) {
         window.open('//' + window.location.host + '/#/goodsDetails?productId=' + productId)
       },
-      _getNavList () {
-        navList().then(res => {
-          this.navList = res.result
-        })
-      }
+      // _getNavList () {
+      //   navList().then(res => {
+      //     this.navList = res.result
+      //   })
+      // }
     },
     mounted () {
-      this._getNavList()
+      // this._getNavList()
       this.token = getStore('token')
-      if (this.login) {
-        this._getCartList()
-      } else {
-        this.INIT_BUYCART()
-      }
+      // if (this.login) {
+      //   this._getCartList()
+      // } else {
+      //   this.INIT_BUYCART()
+      // }
+      this.INIT_BUYCART()
       this.navFixed()
       this.getPage()
       window.addEventListener('scroll', this.navFixed)

@@ -38,26 +38,21 @@ Vue.use(VueLazyload, {
 Vue.config.productionTip = false
 const whiteList = ['/home', '/goods', '/login', '/register', '/goodsDetails', '/thanks', '/search', '/refreshsearch', '/refreshgoods'] // 不需要登陆的页面
 router.beforeEach(function (to, from, next) {
-  let params = {
-    params: {
-      token: getStore('token')
-    }
-  }
-  getInfo(params).then(( data ) => {
-    if (data.status === 401001) { // 没登录
-      if (whiteList.indexOf(to.path) !== -1) { // 白名单
-        next()
+  store.dispatch('GetInfo')
+    .then(( data ) => {
+      if (data.status === 401001) { // 没登录
+        if (whiteList.indexOf(to.path) !== -1) { // 白名单
+          next()
+        } else {
+          next('/login')
+        }
       } else {
-        next('/login')
-      }
-    } else {
-      store.commit('RECORD_USERINFO', {info: res.result})
-      if (to.path === '/login') { //  跳转到
-        next({path: '/'})
-      }
-      next()
-    }
-  })
+        if (to.path === '/login') { //  跳转到
+          next({path: '/'})
+        }
+        next()
+      }  
+    })
 })
 /* eslint-disable no-new */
 new Vue({

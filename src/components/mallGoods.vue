@@ -2,24 +2,24 @@
   <div class="good-item">
     <div style="">
       <div class="good-img">
-        <a @click="openProduct(msg.productId)">
-          <img v-lazy="msg.productImageBig" :alt="msg.productName" :key="msg.productImageBig">
+        <a @click="openProduct(msg.id)">
+          <img v-lazy="msg.pic" :alt="msg.name" :key="msg.id">
         </a>
       </div>
-      <h6 class="good-title" v-html="msg.productName">{{msg.productName}}</h6>
+      <h6 class="good-title" v-html="msg.title">{{msg.title}}</h6>
       <h3 class="sub-title ellipsis">{{msg.subTitle}}</h3>
       <div class="good-price pr">
         <div class="ds pa">
-          <a @click="openProduct(msg.productId)">
+          <a @click="openProduct(msg.id)">
             <y-button text="查看详情" style="margin: 0 5px"></y-button>
           </a>
           <y-button text="加入购物车"
                     style="margin: 0 5px"
-                    @btnClick="addCart(msg.productId,msg.salePrice,msg.productName,msg.productImageBig)"
+                    @btnClick="addCart(msg.id, msg.price, msg.title, msg.pic)"
                     classStyle="main-btn"
           ></y-button>
         </div>
-        <p><span style="font-size:14px">￥</span>{{Number(msg.salePrice).toFixed(2)}}</p>
+        <p><span style="font-size:14px">￥</span>{{Number(msg.price).toFixed(2)}}</p>
       </div>
     </div>
   </div>

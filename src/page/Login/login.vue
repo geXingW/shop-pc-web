@@ -33,7 +33,7 @@
           <div style="margin-top: 25px">
             <y-button :text="logintxt"
                       :classStyle="ruleForm.userPwd&& ruleForm.userName&& logintxt === '登录'?'main-btn':'disabled-btn'"
-                      @btnClick="login"
+                      @btnClick="handlerLogin"
                       style="margin: 0;width: 100%;height: 48px;font-size: 18px;line-height: 48px"></y-button>
           </div>
           <!--返回-->
@@ -83,11 +83,7 @@ export default {
       statusKey: ''
     }
   },
-  computed: {
-    count () {
-      return this.$store.state.login
-    }
-  },
+  computed: {},
   methods: {
     open (t, m) {
       this.$notify.info({
@@ -149,7 +145,7 @@ export default {
       }
       this.cart = cartArr
     },
-    login () {
+    handlerLogin () {
       this.logintxt = '登录中...'
       this.rememberPass()
       if (!this.ruleForm.userName || !this.ruleForm.userPwd) {
@@ -171,34 +167,46 @@ export default {
         // seccode: result.geetest_seccode,
         statusKey: this.statusKey
       }
-      login(params).then(( data ) => {
-        if (data.status === 200000) {
-          setStore('token', data.data.token)
-          setStore('userId', data.data.id)
-          // 登录后添加当前缓存中的购物车
-          if (this.cart.length) {
-            for (var i = 0; i < this.cart.length; i++) {
-              addCart(this.cart[i]).then(res => {
-                if (res.success === true) {
-                }
-              })
-            }
-            removeStore('buyCart')
-            this.$router.push({
-              path: '/'
-            })
-          } else {
-            this.$router.push({
-              path: '/'
-            })
+
+      this.$store.dispatch('Login', params)
+        .then(( data ) => {
+            if (data.status === 200000) {
+              this.$router.push({ path: '/' })
+            }    
           }
-        } else {
-          this.logintxt = '登录'
-          this.message(data.message)
-          captcha.reset()
-          return false
-        }
-      })
+        )
+
+      // login(params).then(( data ) => {
+      //   if (data.status === 200000) {
+      //     // setStore('token', data.data.token)
+      //     // setStore('userId', data.data.id)
+
+
+
+      //     // 登录后添加当前缓存中的购物车
+      //     if (this.cart.length) {
+      //       for (var i = 0; i < this.cart.length; i++) {
+      //         addCart(this.cart[i]).then(res => {
+      //           if (res.success === true) {
+      //           }
+      //         })
+      //       }
+      //       removeStore('buyCart')
+      //       this.$router.push({
+      //         path: '/'
+      //       })
+      //     } else {
+      //       this.$router.push({
+      //         path: '/'
+      //       })
+      //     }
+      //   } else {
+      //     this.logintxt = '登录'
+      //     this.message(data.message)
+      //     captcha.reset()
+      //     return false
+      //   }
+      // })
     },
     // init_geetest () {
     //   geetest().then(res => {

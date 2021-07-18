@@ -1,7 +1,8 @@
 import axios from 'axios'
 import router from '@/router'
-import { getStore } from '/utils/storage'
 import { Notification } from 'element-ui'
+import store from '@/store'
+import { getToken, setToken, removeToken } from '@/utils/auth'
 
 axios.defaults.timeout = 10000
 axios.defaults.headers.post['Content-Type'] = 'application/x-www=form-urlencoded'
@@ -12,13 +13,15 @@ const service = axios.create({
   timeout: 1200000 // 请求超时时间
 })
 
-const getToken = function() {
-  let token =getStore('token')
-  if (token) {
-    token = 'Bearer ' + token
+const isWhiteList = function (url){
+  let whiteList = store.state.whiteList
+  for (var i = 0; i < whiteList.length; i++) {
+    if(url.indexOf(whiteList[i]) != -1) {
+      return true
+    }
   }
 
-  return token
+  return false
 }
 
 // request拦截器
@@ -42,8 +45,20 @@ service.interceptors.response.use(
     if (response.data && response.data.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
       return response.data
     }
+
+    const reqUrl = response.config.url
     const data = response.data || { status: 200000 }
-    if (data.status !== 200000 && data.status !== 401001) {
+
+    // if(data.status == 401001 && !isWhiteList(reqUrl)) {
+    //   Notification.error({
+    //     title: data.message,
+    //     duration: 5000
+    //   })
+
+    //   return Promise.reject(response)
+    // }
+
+    if (![200000, 401001].includes(data.status)) {
       Notification.error({
         title: data.message,
         duration: 5000

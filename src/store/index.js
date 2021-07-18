@@ -2,6 +2,11 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import mutations from './mutations'
 import action from './action'
+import user from './modules/user'
+
+
+const whiteList = ['/home/banner', '/home/product-hot', '/home/product-recommend']
+
 Vue.use(Vuex)
 
 const state = {
@@ -15,11 +20,15 @@ const state = {
   cartPositionT: 0, // 购物车位置
   cartPositionL: 0,
   receiveInCart: false, // 是否进入购物车
-  showCart: false // 是否显示购物车
+  showCart: false, // 是否显示购物车
+  whiteList: whiteList   // 白名单
 }
 
 export default new Vuex.Store({
   state,
   action,
-  mutations
+  mutations,
+  modules: {
+    user
+  }
 })
