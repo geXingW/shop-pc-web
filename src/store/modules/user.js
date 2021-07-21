@@ -73,6 +73,7 @@ const user = {
 
 export const logOut = (commit) => {
   commit('SET_TOKEN', '')
+  clearUserInfo(commit)
   // removeToken()
 }
 

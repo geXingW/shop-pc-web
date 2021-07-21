@@ -48,6 +48,7 @@
       },
       addCart (id, price, name, img) {
         if (!this.showMoveImg) {     // 动画是否在运动
+          /**
           if (this.login) { // 登录了 直接存在用户名下
             addCart({userId: getStore('userId'), productId: id, productNum: 1}).then(res => {
               // 并不重新请求数据
@@ -56,6 +57,14 @@
           } else { // 未登录 vuex
             this.ADD_CART({productId: id, salePrice: price, productName: name, productImg: img})
           }
+
+          **/
+
+          this.$store.dispatch('AddCartItem', {itemId: id, itemPrice: price, itemName: name, itemPic: img})
+            .then( res => {
+              console.log(res)
+            })
+
           // 加入购物车动画
           var dom = event.target
           // 获取点击的坐标
@@ -70,7 +79,14 @@
       }
     },
     computed: {
-      ...mapState(['login', 'showMoveImg', 'showCart'])
+      ...mapState(
+        {
+          'login': state =>  state.user.info != null,
+          'showMoveImg': state =>  state.showMoveImg,
+          'showCart': state =>  state.showCart
+        }
+        // ['login', 'showMoveImg', 'showCart']
+      )
     },
     mounted () {
     },

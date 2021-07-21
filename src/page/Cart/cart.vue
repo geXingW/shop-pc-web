@@ -134,7 +134,7 @@
     },
     computed: {
       ...mapState(
-        ['cartList']
+        {cartList: state => state.cart.cartList},
       ),
       // 是否全选
       checkAllFlag () {

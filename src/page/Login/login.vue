@@ -171,6 +171,9 @@ export default {
       this.$store.dispatch('Login', params)
         .then(( data ) => {
             if (data.status === 200000) {
+              
+
+
               this.$router.push({ path: '/' })
             }    
           }
