@@ -175,9 +175,18 @@
       }
     },
     computed: {
-      ...mapState([
-        'cartList', 'login', 'receiveInCart', 'showCart', 'userInfo'
-      ]),
+      ...mapState(
+        // [
+        // 'cartList', 'login', 'receiveInCart', 'showCart', 'userInfo'
+      // ]
+        {
+          cartList: state => state.cart.cartList,
+          login: state => state.login,
+          receiveInCart: state => state.receiveInCart,
+          showCart: state => state.showCart,
+          userInfo: state => state.user.info
+        }
+      ),
       // 计算价格
       totalPrice () {
         var totalPrice = 0
@@ -196,7 +205,7 @@
       }
     },
     methods: {
-      ...mapMutations(['ADD_CART', 'INIT_BUYCART', 'ADD_ANIMATION', 'SHOW_CART', 'REDUCE_CART', 'RECORD_USERINFO', 'EDIT_CART']),
+      ...mapMutations(['INIT_CART_ITEM', 'ADD_CART', 'INIT_BUYCART', 'ADD_ANIMATION', 'SHOW_CART', 'REDUCE_CART', 'RECORD_USERINFO', 'EDIT_CART']),
       handleIconClick (ev) {
         if (this.$route.path === '/search') {
           this.$router.push({
@@ -376,6 +385,7 @@
       //   this.INIT_BUYCART()
       // }
       this.INIT_BUYCART()
+      this.INIT_CART_ITEM()
       this.navFixed()
       this.getPage()
       window.addEventListener('scroll', this.navFixed)

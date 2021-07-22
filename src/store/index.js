@@ -22,7 +22,7 @@ const state = {
   cartPositionL: 0,
   receiveInCart: false, // 是否进入购物车
   showCart: false, // 是否显示购物车
-  whiteList: whiteList   // 白名单
+  whiteList: whiteList   // 白名单,
 }
 
 export default new Vuex.Store({

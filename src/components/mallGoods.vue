@@ -59,11 +59,16 @@
           }
 
           **/
-
-          this.$store.dispatch('AddCartItem', {itemId: id, itemPrice: price, itemName: name, itemPic: img})
-            .then( res => {
-              console.log(res)
-            })
+          let params = {itemId: id, itemPrice: price, itemName: name, itemPic: img}
+          if(this.login){
+             this.$store.dispatch('AddCartItem', params)
+              .then( res => {
+                console.log(res)
+              })
+          } else {
+            this.$store.commit('ADD_CART_ITEM', params)
+          }
+         
 
           // 加入购物车动画
           var dom = event.target
@@ -81,7 +86,7 @@
     computed: {
       ...mapState(
         {
-          'login': state =>  state.user.info != null,
+          'login': state => !!state.user.info,
           'showMoveImg': state =>  state.showMoveImg,
           'showCart': state =>  state.showCart
         }

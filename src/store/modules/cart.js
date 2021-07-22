@@ -1,18 +1,23 @@
 import { list, add, update, remove } from '@/api/cart'
 import {setStore, getStore, removeStore} from '@/utils/storage'
+import {getCartItems, setCartItems, removeCartItems} from '@/utils/cart'
 
 const cart = {
   state: {
     cartList: []
   },
   mutations: {
+    INIT_CART_ITEM: (state) => {
+      state.cartList = getCartItems()
+
+      console.log(state.cartList)
+    },
     SET_CART_ITEMS: (state, items) => {
       state.cartList = items
-
-      updateCartStorage(state.cartList)
+      setCartItems(items)
     },
     ADD_CART_ITEM: (state, item) => {
-      if(state.cartList.findIndex(i => i.itemId == item.itemId) != -1){ // 如果已经包含该属性
+      if(state.cartList.findIndex(i => i.itemId == item.itemId) == -1){ // 如果不包含该属性
         state.cartList.push(item)
       }else{  // 购物车已经存在的，更新已有数量
         state.cartList.map( i => {
@@ -25,9 +30,9 @@ const cart = {
       }
 
       // 重新建立索引
-      state.cartList = array_values(state.cartList)
+      // state.cartList = array_values(state.cartList)
 
-      updateCartStorage(state.cartList)
+      setCartItems(state.cartList)
     },
     UPDATE_CART_ITEM: (state, item) => {
       state.cartList.map( i => {
@@ -38,12 +43,12 @@ const cart = {
         return i
       })
 
-      updateCartStorage(state.cartList)
+      setCartItems(state.cartList)
     },
     REMOVE_CART_ITEM: (state, item) => {
       state.cartList = state.cartList.filter( i => i.itemId != item.itemId)
 
-      updateCartStorage(state.cartList)
+      setCartItems(state.cartList)
     },
   },
 
@@ -108,7 +113,7 @@ const cart = {
 }
 
 const updateCartStorage = ( items ) => {
-  setStore('CART_ITEMS', items)
+  setStore(CART_STORE_NAMER, JSON.parse(items))
 }
 
 export default cart
