@@ -87,7 +87,7 @@
                                   </div>
                                   <div class="item-desc">
                                     <div class="cart-cell"><h4>
-                                      <a href="" v-text="item.itemName"></a>
+                                      <a href="" v-text="item.itemTitle"></a>
                                     </h4>
                                       <!-- <p class="attrs"><span>白色</span></p> -->
                                       <h6><span class="price-icon">¥</span><span
@@ -323,7 +323,7 @@
             this.EDIT_CART({productId})
           })
         } else {
-          this.EDIT_CART({productId})
+          this.$store.commit('REMOVE_CART_ITEM', productId)
         }
       },
       toCart () {

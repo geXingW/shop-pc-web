@@ -54,6 +54,7 @@
 </template>
 <script src="../../../static/geetest/gt.js"></script>
 <script>
+import { mapMutations, mapState } from 'vuex'
 import YFooter from '/common/footer'
 import YButton from '/components/YButton'
 import { userLogin, geetest } from '/api/index.js'
@@ -83,8 +84,15 @@ export default {
       statusKey: ''
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(
+        {
+          cartList: state => state.cart.cartList
+        }
+      ),
+  },
   methods: {
+    ...mapMutations(['INIT_CART_ITEM']),
     open (t, m) {
       this.$notify.info({
         title: t,
@@ -131,21 +139,22 @@ export default {
       this.$router.go(-1)
     },
     // 登陆时将本地的添加到用户购物车
-    login_addCart () {
-      let cartArr = []
-      let locaCart = JSON.parse(getStore('buyCart'))
-      if (locaCart && locaCart.length) {
-        locaCart.forEach(item => {
-          cartArr.push({
-            userId: getStore('userId'),
-            productId: item.productId,
-            productNum: item.productNum
-          })
-        })
-      }
-      this.cart = cartArr
-    },
+    // login_addCart () {
+    //   let cartArr = []
+    //   let locaCart = JSON.parse(getStore('buyCart'))
+    //   if (locaCart && locaCart.length) {
+    //     locaCart.forEach(item => {
+    //       cartArr.push({
+    //         userId: getStore('userId'),
+    //         productId: item.productId,
+    //         productNum: item.productNum
+    //       })
+    //     })
+    //   }
+    //   this.cart = cartArr
+    // },
     handlerLogin () {
+      let that = this
       this.logintxt = '登录中...'
       this.rememberPass()
       if (!this.ruleForm.userName || !this.ruleForm.userPwd) {
@@ -171,8 +180,12 @@ export default {
       this.$store.dispatch('Login', params)
         .then(( data ) => {
             if (data.status === 200000) {
-              
-
+              // 将本地购物车信息，保存到数据库
+              if(that.cartList.length > 0){
+                for(let i = 0; i < that.cartList.length; i++) {
+                  this.$store.dispatch('AddCartItem', { localExist: true, ...that.cartList[i] })
+                }
+              }
 
               this.$router.push({ path: '/' })
             }    
@@ -232,8 +245,9 @@ export default {
     // }
   },
   mounted () {
+    this.INIT_CART_ITEM()
     this.getRemembered()
-    this.login_addCart()
+    // this.login_addCart()
     // this.init_geetest()
     this.open('登录提示', '测试体验账号密码：test | test')
   },

@@ -45,8 +45,8 @@ const cart = {
 
       setCartItems(state.cartList)
     },
-    REMOVE_CART_ITEM: (state, item) => {
-      state.cartList = state.cartList.filter( i => i.itemId != item.itemId)
+    REMOVE_CART_ITEM: (state, itemId) => {
+      state.cartList = state.cartList.filter( i => i.itemId != itemId)
 
       setCartItems(state.cartList)
     },
@@ -71,7 +71,8 @@ const cart = {
     AddCartItem({ commit, state }, item) {
       return new Promise((resolve, reject) => {
         add(item).then(response => {
-          if(response.status == 200000){
+          console.log(item)
+          if(response.status == 200000 && item.localExist){
            commit('ADD_CART_ITEM', item)
           }
 
