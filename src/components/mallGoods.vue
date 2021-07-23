@@ -59,7 +59,8 @@
           }
 
           **/
-          let params = {itemId: id, itemPrice: price, itemName: name, itemPic: img}
+          let params = {itemId: id, itemPrice: price, itemName: name, itemPic: img, itemQuantity: 1}
+          console.log(params)
           if(this.login){
              this.$store.dispatch('AddCartItem', params)
               .then( res => {

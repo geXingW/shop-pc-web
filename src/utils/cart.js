@@ -5,7 +5,7 @@ const CART_STORE_NAME = 'CART_ITEMS'
 
 export function getCartItems() {
 	let cartList = getStore(CART_STORE_NAME)
-	return cartList ? JSON.stringify(cartList): []
+	return cartList ? JSON.parse(cartList): []
 }
 
 export function setCartItems(cartItems) {

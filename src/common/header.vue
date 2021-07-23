@@ -81,22 +81,22 @@
                           <li class="clearfix" v-for="(item,i) in cartList" :key="i">
                             <div class="cart-item">
                               <div class="cart-item-inner">
-                                <a @click="openProduct(item.productId)">
+                                <a @click="openProduct(item.itemId)">
                                   <div class="item-thumb">
-                                    <img :src="item.productImg">
+                                    <img :src="item.itemPic">
                                   </div>
                                   <div class="item-desc">
                                     <div class="cart-cell"><h4>
-                                      <a href="" v-text="item.productName"></a>
+                                      <a href="" v-text="item.itemName"></a>
                                     </h4>
                                       <!-- <p class="attrs"><span>白色</span></p> -->
                                       <h6><span class="price-icon">¥</span><span
-                                        class="price-num">{{item.salePrice}}</span><span
-                                        class="item-num">x {{item.productNum}}</span>
+                                        class="price-num">{{item.itemPrice}}</span><span
+                                        class="item-num">x {{item.itemQuantity}}</span>
                                       </h6></div>
                                   </div>
                                 </a>
-                                <div class="del-btn del" @click="delGoods(item.productId)">删除</div>
+                                <div class="del-btn del" @click="delGoods(item.itemId)">删除</div>
                               </div>
                             </div>
                           </li>
@@ -191,7 +191,7 @@
       totalPrice () {
         var totalPrice = 0
         this.cartList && this.cartList.forEach(item => {
-          totalPrice += (item.productNum * item.salePrice)
+          totalPrice += (item.itemQuantity * item.itemPrice)
         })
         return totalPrice
       },
@@ -199,7 +199,7 @@
       totalNum () {
         var totalNum = 0
         this.cartList && this.cartList.forEach(item => {
-          totalNum += (item.productNum)
+          totalNum += (item.itemQuantity)
         })
         return totalNum
       }
