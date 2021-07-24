@@ -9,7 +9,8 @@ import {
   EDIT_CART,
   INIT_CART_ITEMS,
   CLEAR_CART_ITEMS,
-  UPDATE_CART_ITEM_QUANTITY
+  UPDATE_CART_ITEM_QUANTITY,
+  REMOVE_CART_ITEM
 } from './mutation-types'
 import { setStore, getStore, removeStore } from '../utils/storage'
 import { getCartItems, setCartItems, removeCartItems, clearCartItems } from '@/utils/cart'
@@ -33,6 +34,9 @@ export default {
 
       return i
     })
+  },
+  [REMOVE_CART_ITEM]: (state, itemId) => {
+    state.cart.cartList = state.cart.cartList.filter(i => i.itemId != itemId)
   },
   // 网页初始化时从本地缓存获取购物车数据
   [INIT_BUYCART] (state) {

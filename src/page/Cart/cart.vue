@@ -248,9 +248,15 @@
       },
       // 删除整条购物车
       cartdel (itemId) {
-        cartDel({userId: this.userId, itemId}).then(res => {
-          this.EDIT_CART({itemId})
+        this.$store.dispatch('RemoveCartItem', [itemId]).then(data => {
+          if(data.status == 200000){
+            this.$store.commit('REMOVE_CART_ITEM', itemId)
+          }
         })
+
+        // cartDel({userId: this.userId, itemId}).then(res => {
+        //   this.EDIT_CART({itemId})
+        // })
       },
       checkout () {
         this.checkoutNow = '结算中...'

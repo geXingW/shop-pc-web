@@ -25,8 +25,8 @@ export function update (data) {
 
 export function remove (ids) {
   return request({
-    url: 'auth/logout',
+    url: '/cart',
     method: 'delete',
-    data: { ids }
+    data: ids
   })
 }

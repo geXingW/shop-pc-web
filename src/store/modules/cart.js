@@ -97,12 +97,12 @@ const cart = {
   	 })
     },
     // 移出购物车
-    RemoveCartItem({ commit, state }, item) {
+    RemoveCartItem({ commit, state }, ids) {
       return new Promise((resolve, reject) => {
-        remove(item).then(response => {
-          if(response.status == 200000){
-            commit('REMOVE_CART_ITEM', item)
-          }
+        remove(ids).then(response => {
+          // if(response.status == 200000){
+          //   commit('REMOVE_CART_ITEM', item)
+          // }
 
           resolve(response)
         }).catch(error => {
