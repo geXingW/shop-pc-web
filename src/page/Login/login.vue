@@ -61,6 +61,7 @@ import { userLogin, geetest } from '/api/index.js'
 import { login } from '/api/auth'
 import { addCart } from '/api/goods.js'
 import { setStore, getStore, removeStore } from '/utils/storage.js'
+import {  } from '/utils/cart'
 require('../../../static/geetest/gt.js')
 var captcha
 export default {
@@ -92,7 +93,7 @@ export default {
       ),
   },
   methods: {
-    ...mapMutations(['INIT_CART_ITEM']),
+    ...mapMutations(['INIT_CART_ITEMS']),
     open (t, m) {
       this.$notify.info({
         title: t,
@@ -185,6 +186,8 @@ export default {
                 for(let i = 0; i < that.cartList.length; i++) {
                   this.$store.dispatch('AddCartItem', { localExist: true, ...that.cartList[i] })
                 }
+
+                removeStore('buyCart')
               }
 
               this.$router.push({ path: '/' })
@@ -245,7 +248,7 @@ export default {
     // }
   },
   mounted () {
-    this.INIT_CART_ITEM()
+    this.INIT_CART_ITEMS()
     this.getRemembered()
     // this.login_addCart()
     // this.init_geetest()

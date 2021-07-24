@@ -205,7 +205,16 @@
       }
     },
     methods: {
-      ...mapMutations(['INIT_CART_ITEM', 'ADD_CART', 'INIT_BUYCART', 'ADD_ANIMATION', 'SHOW_CART', 'REDUCE_CART', 'RECORD_USERINFO', 'EDIT_CART']),
+      ...mapMutations(['INIT_CART_ITEMS', 'ADD_CART', 'INIT_BUYCART', 'ADD_ANIMATION', 'SHOW_CART', 'REDUCE_CART', 'RECORD_USERINFO', 'EDIT_CART']),
+      getCartList (){
+        if(this.userInfo) { // 已登录，查询接口
+          this.$store.dispatch("GetCartList").then(res => {
+            console.log(res)
+          })
+        }else{ // 未登录从storage 获取
+          this.INIT_CART_ITEMS()
+        }
+      },
       handleIconClick (ev) {
         if (this.$route.path === '/search') {
           this.$router.push({
@@ -384,8 +393,8 @@
       // } else {
       //   this.INIT_BUYCART()
       // }
-      this.INIT_BUYCART()
-      this.INIT_CART_ITEM()
+      // this.INIT_BUYCART()
+      this.getCartList()
       this.navFixed()
       this.getPage()
       window.addEventListener('scroll', this.navFixed)

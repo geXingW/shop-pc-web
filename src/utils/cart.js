@@ -15,3 +15,7 @@ export function setCartItems(cartItems) {
 export function removeCartItems() {
 	return removeStore(CART_STORE_NAME)
 }
+
+export function clearCartItems(){
+	return removeStore(CART_STORE_NAME)	
+}

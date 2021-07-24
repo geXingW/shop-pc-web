@@ -36,11 +36,11 @@ const cart = {
     },
     UPDATE_CART_ITEM: (state, item) => {
       state.cartList.map( i => {
-        if(i.itemId == item.itemId){
-          i.itemQuantity += item.itemQuantity
-        }
+        // if(i.itemId == item.itemId){
+          // i.itemQuantity += item.itemQuantity
+        // }
 
-        return i
+        return i.itemId == item.itemId ? item : i
       })
 
       setCartItems(state.cartList)

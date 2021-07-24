@@ -17,25 +17,25 @@
               </div>
               <!--列表-->
               <div class="cart-table" v-for="(item,i) in cartList" :key="i">
-                <div class="cart-group divide pr" :data-productid="item.productId">
+                <div class="cart-group divide pr" :data-productid="item.itemId">
                   <div class="cart-top-items">
                     <div class="cart-items clearfix">
                       <!--勾选-->
                       <div class="items-choose">
-                      <span class="blue-checkbox-new " :class="{'checkbox-on':item.checked === '1'}"
+                      <span class="blue-checkbox-new " :class="{'checkbox-on':item.checked === 1}"
                             @click="editCart('check',item)"></span>
                       </div>
                       <!--图片-->
                       <div class="items-thumb fl">
-                        <img :alt="item.productName"
-                             :src="item.productImg">
-                        <a @click="goodsDetails(item.productId)" :title="item.productName" target="_blank"></a>
+                        <img :alt="item.itemTitle"
+                             :src="item.itemPic">
+                        <a @click="goodsDetails(item.itemId)" :title="item.itemTitle" target="_blank"></a>
                       </div>
                       <!--信息-->
                       <div class="name hide-row fl">
                         <div class="name-table">
-                          <a @click="goodsDetails(item.productId)" :title="item.productName" target="_blank"
-                             v-text="item.productName"></a>
+                          <a @click="goodsDetails(item.itemId)" :title="item.itemTitle" target="_blank"
+                             v-text="item.itemTitle"></a>
                           <!-- <ul class="attribute">
                             <li>白色</li>
                           </ul> -->
@@ -43,26 +43,26 @@
                       </div>
                       <!--删除按钮-->
                       <div class="operation">
-                        <a class="items-delete-btn" @click="cartdel(item.productId)"></a>
+                        <a class="items-delete-btn" @click="cartdel(item.itemId)"></a>
                       </div>
                       <!--商品数量-->
                       <div>
                         <!--总价格-->
-                        <div class="subtotal" style="font-size: 14px">¥ {{item.salePrice * item.productNum}}</div>
+                        <div class="subtotal" style="font-size: 14px">¥ {{item.itemPrice * item.itemQuantity}}</div>
                         <!--数量-->
-                        <buy-num :num="item.productNum"
-                                 :id="item.productId"
-                                 :checked="item.checked"
+                        <buy-num :num="item.itemQuantity"
+                                 :id="item.itemId"
+                                 :checked="!!item.checked"
                                  style="height: 140px;
                                    display: flex;
                                    align-items: center;
                                    justify-content: center;"
-                                 :limit="item.limitNum"
+                                 :limit="item.limitQuantity"
                                  @edit-num="EditNum"
                         >
                         </buy-num>
                         <!--价格-->
-                        <div class="price1">¥ {{item.salePrice}}</div>
+                        <div class="price1">¥ {{item.itemPrice}}</div>
                       </div>
                     </div>
                   </div>
@@ -144,7 +144,7 @@
       checkedCount () {
         var i = 0
         this.cartList && this.cartList.forEach((item) => {
-          if (item.checked === '1') i++
+          if (item.checked === 1) i++
         })
         return Number(i)
       },
@@ -152,7 +152,7 @@
       totalNum () {
         var totalNum = 0
         this.cartList && this.cartList.forEach(item => {
-          totalNum += (item.productNum)
+          totalNum += (item.itemQuantity)
         })
         return Number(totalNum)
       },
@@ -160,8 +160,8 @@
       checkPrice () {
         var totalPrice = 0
         this.cartList && this.cartList.forEach(item => {
-          if (item.checked === '1') {
-            totalPrice += (item.productNum * item.salePrice)
+          if (item.checked === 1) {
+            totalPrice += (item.itemQuantity * item.itemPrice)
           }
         })
         return totalPrice
@@ -170,8 +170,8 @@
       checkNum () {
         var checkNum = 0
         this.cartList && this.cartList.forEach(item => {
-          if (item.checked === '1') {
-            checkNum += (item.productNum)
+          if (item.checked === 1) {
+            checkNum += (item.itemQuantity)
           }
         })
         return checkNum
@@ -179,7 +179,7 @@
     },
     methods: {
       ...mapMutations([
-        'INIT_BUYCART', 'EDIT_CART'
+        'INIT_BUYCART', 'EDIT_CART', 'UPDATE_CART_ITEM_QUANTITY'
       ]),
       message (m) {
         this.$message.error({
@@ -197,48 +197,59 @@
         })
       },
       // 修改购物车
-      _cartEdit (userId, productId, productNum, checked) {
-        cartEdit(
-          {
-            userId,
-            productId,
-            productNum,
-            checked
-          }
-        ).then(res => {
-          if (res.success === true) {
-            this.EDIT_CART(
-              {
-                productId,
-                checked,
-                productNum
-              }
-            )
+      _cartEdit (item) {
+        this.$store.dispatch("UpdateCartItem", item).then(data => {
+          if(data.status == 200000) {
+              this.$store.commit('UPDATE_CART_ITEM_QUANTITY', item)
           }
         })
+        // cartEdit(
+        //   {
+        //     userId,
+        //     itemId,
+        //     itemQuantity,
+        //     checked
+        //   }
+        // ).then(res => {
+        //   if (res.success === true) {
+        //     this.EDIT_CART(
+        //       {
+        //         itemId,
+        //         checked,
+        //         itemQuantity
+        //       }
+        //     )
+        //   }
+        // })
       },
       // 修改购物车
       editCart (type, item) {
         if (type && item) {
           let checked = item.checked
-          let productId = item.productId
-          let productNum = item.productNum
+          // let itemId = item.itemId
+          // let itemQuantity = item.itemQuantity
           // 勾选
           if (type === 'check') {
-            let newChecked = checked === '1' ? '0' : '1'
-            this._cartEdit(this.userId, productId, productNum, newChecked)
+            item.checked = checked === 1 ? 0 : 1
+
+            // this.$store.dispatch("UpdateCartItem", item).then(res => {
+            //   console.log(res)
+            // })
+            this._cartEdit(item)
           }
         } else {
           console.log('缺少所需参数')
         }
       },
-      EditNum (productNum, productId, checked) { // 数量
-        this._cartEdit(this.userId, productId, productNum, checked)
+
+      EditNum (itemQuantity, itemId, checked) { // 数量
+        // this._cartEdit(this.userId, itemId, itemQuantity, checked)
+        this._cartEdit({ itemId, itemQuantity, checked: checked ? 1: 0 })
       },
       // 删除整条购物车
-      cartdel (productId) {
-        cartDel({userId: this.userId, productId}).then(res => {
-          this.EDIT_CART({productId})
+      cartdel (itemId) {
+        cartDel({userId: this.userId, itemId}).then(res => {
+          this.EDIT_CART({itemId})
         })
       },
       checkout () {
@@ -250,9 +261,9 @@
         getCartList({userId: getStore('userId')}).then(res => {
           if (res.success === true) {
             res.result.forEach(item => {
-              if (item.checked === '1') {
-                let productId = item.productId
-                this.EDIT_CART({productId})
+              if (item.checked === 1) {
+                let itemId = item.itemId
+                this.EDIT_CART({itemId})
               }
             })
           }

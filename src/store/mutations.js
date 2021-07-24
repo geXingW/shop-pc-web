@@ -7,15 +7,32 @@ import {
   SHOW_CART,
   REDUCE_CART,
   EDIT_CART,
-  INIT_CART_ITEM
+  INIT_CART_ITEMS,
+  CLEAR_CART_ITEMS,
+  UPDATE_CART_ITEM_QUANTITY
 } from './mutation-types'
-import { setStore, getStore } from '../utils/storage'
+import { setStore, getStore, removeStore } from '../utils/storage'
+import { getCartItems, setCartItems, removeCartItems, clearCartItems } from '@/utils/cart'
+
 export default {
-  [INIT_CART_ITEM] (state) {
-    let cartList = getStore('buyCart')
-    if (cartList) {
-      state.cart.cartList = JSON.parse(cartList)
-    }
+  [INIT_CART_ITEMS] (state) {
+    state.cart.cartList = getCartItems()
+  },
+  // [QUERY_CART_ITEMS] (state) {
+  //   state.cart.cartList = getCartItems()
+  // },
+  [CLEAR_CART_ITEMS]: (state, itemId) => {
+    state.cartList = []
+    clearCartItems()
+  },
+  [UPDATE_CART_ITEM_QUANTITY]: (state, item) => {
+    state.cart.cartList = state.cart.cartList.map(i => {
+      if(i.itemId == item.itemId) {
+        i.itemQuantity = item.itemQuantity
+      }
+
+      return i
+    })
   },
   // 网页初始化时从本地缓存获取购物车数据
   [INIT_BUYCART] (state) {
