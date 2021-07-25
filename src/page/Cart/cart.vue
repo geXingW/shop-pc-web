@@ -179,7 +179,7 @@
     },
     methods: {
       ...mapMutations([
-        'INIT_BUYCART', 'EDIT_CART', 'UPDATE_CART_ITEM_QUANTITY'
+        'INIT_CART_ITEMS', 'EDIT_CART', 'UPDATE_CART_ITEM_QUANTITY'
       ]),
       message (m) {
         this.$message.error({
@@ -283,7 +283,7 @@
     },
     mounted () {
       this.userId = getStore('userId')
-      this.INIT_BUYCART()
+      this.INIT_CART_ITEMS()
     },
     components: {
       YButton,

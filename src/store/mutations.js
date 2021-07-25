@@ -14,10 +14,20 @@ import {
 } from './mutation-types'
 import { setStore, getStore, removeStore } from '../utils/storage'
 import { getCartItems, setCartItems, removeCartItems, clearCartItems } from '@/utils/cart'
+import { list, add, update, remove } from '@/api/cart'
 
 export default {
   [INIT_CART_ITEMS] (state) {
-    state.cart.cartList = getCartItems()
+    if(state.user.info){  // 从接口获取
+      list().then(res => {
+        console.log(res)
+        if(res.status == 200000){
+          state.cart.cartList = res.data
+        }
+      })
+    } else { // 从本地storage获取
+      state.cart.cartList = getCartItems()
+    }
   },
   // [QUERY_CART_ITEMS] (state) {
   //   state.cart.cartList = getCartItems()

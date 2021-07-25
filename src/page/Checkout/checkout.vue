@@ -50,21 +50,21 @@
                 <span class="price">单价</span>
               </div>
               <!--列表-->
-              <div class="cart-table" v-for="(item,i) in cartList" :key="i" v-if="item.checked === '1'">
-                <div class="cart-group divide pr" :data-productid="item.productId">
+              <div class="cart-table" v-for="(item,i) in cartList" :key="i" v-if="item.checked === 1">
+                <div class="cart-group divide pr" :data-productid="item.itemId">
                   <div class="cart-top-items">
                     <div class="cart-items clearfix">
                       <!--图片-->
                       <div class="items-thumb fl">
-                        <img :alt="item.productName"
-                             :src="item.productImg">
-                        <a @click="goodsDetails(item.productId)" :title="item.productName" target="_blank"></a>
+                        <img :alt="item.itemTitle"
+                             :src="item.itemPic">
+                        <a @click="goodsDetails(item.itemId)" :title="item.itemTitle" target="_blank"></a>
                       </div>
                       <!--信息-->
                       <div class="name hide-row fl">
                         <div class="name-table">
-                          <a @click="goodsDetails(item.productId)" :title="item.productName" target="_blank"
-                             v-text="item.productName"></a>
+                          <a @click="goodsDetails(item.productId)" :title="item.itemTitle" target="_blank"
+                             v-text="item.itemTitle"></a>
                           <!-- <ul class="attribute">
                             <li>白色</li>
                           </ul> -->
@@ -73,13 +73,13 @@
                       <!--商品数量-->
                       <div>
                         <!--总价格-->
-                        <div class="subtotal" style="font-size: 14px">¥ {{item.salePrice * item.productNum}}</div>
+                        <div class="subtotal" style="font-size: 14px">¥ {{item.itemPrice * item.itemQuantity}}</div>
                         <!--数量-->
                         <div class="item-cols-num">
-                          <span v-text="item.productNum"></span>
+                          <span v-text="item.itemQuantity"></span>
                         </div>
                         <!--价格-->
-                        <div class="price">¥ {{item.salePrice}}</div>
+                        <div class="price">¥ {{item.itemPrice}}</div>
                       </div>
                     </div>
                   </div>
@@ -135,17 +135,19 @@
   </div>
 </template>
 <script>
-  import { getCartList, addressList, addressUpdate, addressAdd, addressDel, productDet, submitOrder } from '/api/goods'
+  import { addressList, addressUpdate, addressAdd, addressDel, productDet, submitOrder } from '/api/goods'
   import YShelf from '/components/shelf'
   import YButton from '/components/YButton'
   import YPopup from '/components/popup'
   import YHeader from '/common/header'
   import YFooter from '/common/footer'
   import { getStore } from '/utils/storage'
+  import { mapMutations, mapState } from 'vuex'
+
   export default {
     data () {
       return {
-        cartList: [],
+        // cartList: [],
         addList: [],
         addressId: '0',
         popupOpen: false,
@@ -169,6 +171,9 @@
       }
     },
     computed: {
+      ...mapState(
+        {cartList: state => state.cart.cartList},
+      ),
       btnHighlight () {
         let msg = this.msg
         return msg.userName && msg.tel && msg.streetName
@@ -177,8 +182,8 @@
       checkPrice () {
         let totalPrice = 0
         this.cartList && this.cartList.forEach(item => {
-          if (item.checked === '1') {
-            totalPrice += (item.productNum * item.salePrice)
+          if (item.checked === 1) {
+            totalPrice += (item.itemQuantity * item.itemPrice)
           }
         })
         this.orderTotal = totalPrice
@@ -186,6 +191,9 @@
       }
     },
     methods: {
+      ...mapMutations([
+        'INIT_CART_ITEMS'
+      ]),
       message (m) {
         this.$message.error({
           message: m
@@ -193,11 +201,6 @@
       },
       goodsDetails (id) {
         window.open(window.location.origin + '#/goodsDetails?productId=' + id)
-      },
-      _getCartList () {
-        getCartList({userId: this.userId}).then(res => {
-          this.cartList = res.result
-        })
       },
       _addressList () {
         addressList({userId: this.userId}).then(res => {
@@ -341,9 +344,9 @@
         this.num = query.num
         this._productDet(this.productId)
       } else {
-        this._getCartList()
+        this.INIT_CART_ITEMS()
       }
-      this._addressList()
+      // this._addressList()
     },
     components: {
       YShelf,

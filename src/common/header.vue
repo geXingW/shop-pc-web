@@ -316,15 +316,6 @@
       cartShowState (state) {
         this.SHOW_CART({showCart: state})
       },
-      // 登陆时获取一次购物车商品
-      _getCartList () {
-        getCartList({userId: getStore('userId')}).then(res => {
-          if (res.success === true) {
-            setStore('buyCart', res.result)
-          }
-          // 重新初始化一次本地数据
-        }).then(this.INIT_BUYCART)
-      },
       // 删除商品
       delGoods (productId) {
         if (this.login) { // 登陆了
@@ -388,12 +379,6 @@
     mounted () {
       // this._getNavList()
       this.token = getStore('token')
-      // if (this.login) {
-      //   this._getCartList()
-      // } else {
-      //   this.INIT_BUYCART()
-      // }
-      // this.INIT_BUYCART()
       this.getCartList()
       this.navFixed()
       this.getPage()

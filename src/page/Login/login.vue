@@ -14,7 +14,7 @@
             </li>
             <li>
               <div class="input">
-                <input type="password" v-model="ruleForm.userPwd" @keyup.enter="login" placeholder="密码">
+                <input type="password" v-model="ruleForm.userPwd" @keyup.enter="handlerLogin" placeholder="密码">
               </div>
             </li>
 <!--             <li>
