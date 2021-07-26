@@ -8,12 +8,12 @@
       <y-shelf title="收货信息">
         <div slot="content">
           <ul class="address-item-list clearfix">
-            <li v-for="(item,i) in addList"
+            <li v-for="(item,i) in addressList"
                 :key="i"
                 class="address pr"
-                :class="{checked:id === item.id}"
-                @click="chooseAddress(item.id, item.userName, item.phoneNumber, item.streetName)">
-           <span v-if="id === item.id" class="pa">
+                :class="{checked:selectedAddressId === item.id}"
+                @click="selectedAddressId = item.id">
+           <span v-if="selectedAddressId === item.id" class="pa">
              <svg viewBox="0 0 1473 1024" width="17.34375" height="12">
              <path
                d="M1388.020 57.589c-15.543-15.787-37.146-25.569-61.033-25.569s-45.491 9.782-61.023 25.558l-716.054 723.618-370.578-374.571c-15.551-15.769-37.151-25.537-61.033-25.537s-45.482 9.768-61.024 25.527c-15.661 15.865-25.327 37.661-25.327 61.715 0 24.053 9.667 45.849 25.327 61.715l431.659 436.343c15.523 15.814 37.124 25.615 61.014 25.615s45.491-9.802 61.001-25.602l777.069-785.403c15.624-15.868 25.271-37.66 25.271-61.705s-9.647-45.837-25.282-61.717M1388.020 57.589z"
@@ -26,12 +26,12 @@
               <p class="street-name ellipsis">收货地址: {{ item.province + item.city + item.region + item.detailAddress }}</p>
               <p>手机号码: {{item.phoneNumber}}</p>
               <div class="operation-section">
-                <span class="update-btn" style="font-size:12px" @click="update(item)">修改</span>
-                <span class="delete-btn" style="font-size:12px" :data-id="item.id" @click="del(item.id)">删除</span>
+                <span class="update-btn" style="font-size:12px" @click="updateAddress(item)">修改</span>
+                <span class="delete-btn" style="font-size:12px" :data-id="item.id" @click="delAddress(item.id)">删除</span>
               </div>
             </li>
 
-            <li class="add-address-item" @click="update()">
+            <li class="add-address-item" @click="addAddress()">
               <img src="../../../static/svg/jia.svg" alt="">
               <p>使用新地址</p>
             </li>
@@ -111,23 +111,23 @@
       </y-shelf>
 
       <y-popup :open="popupOpen" @close='popupOpen=false' :title="popupTitle">
-        <div slot="content" class="md" :data-id="msg.id">
+        <div slot="content" class="md" :data-id="address.id">
           <div>
-            <input type="text" placeholder="收货人姓名" v-model="msg.userName">
+            <input type="text" placeholder="收货人姓名" v-model="address.name">
           </div>
           <div>
-            <input type="number" placeholder="手机号码" v-model="msg.phoneNumber">
+            <input type="number" placeholder="手机号码" v-model="address.phoneNumber">
           </div>
           <div>
-            <input type="text" placeholder="收货地址" v-model="msg.streetName">
+            <input type="text" placeholder="收货地址" v-model="address.detailAddress">
           </div>
           <div>
-            <el-checkbox class="auto-login" v-model="msg.isDefault">设为默认</el-checkbox>
+            <el-checkbox class="auto-login" v-model="address.defaultStatus">设为默认</el-checkbox>
           </div>
           <y-button text='保存'
                     class="btn"
                     :classStyle="btnHighlight?'main-btn':'disabled-btn'"
-                    @btnClick="save({userId:userId,id:msg.id,userName:msg.userName,phoneNumber:msg.phoneNumber,streetName:msg.streetName,isDefault:msg.isDefault})">
+                    @btnClick="saveAddress({ id: address.id, name: address.name, phoneNumber: address.phoneNumber, detailAddress: address.detailAddress, defaultStatus: address.defaultStatus })">
           </y-button>
         </div>
       </y-popup>
@@ -136,8 +136,7 @@
   </div>
 </template>
 <script>
-  // import { addressList, addressUpdate, addressAdd, addressDel, productDet, submitOrder } from '/api/goods'
-  import { list as addressList, addressAdd as add, addressUpdate as update, addressRemove as remove } from '@/api/address'
+  import { list as addressList, add as addressAdd, update as addressUpdate, remove as addressRemove } from '@/api/address'
   import YShelf from '/components/shelf'
   import YButton from '/components/YButton'
   import YPopup from '/components/popup'
@@ -150,22 +149,20 @@
     data () {
       return {
         // cartList: [],
-        addList: [],
+        addressList: [],
         id: '0',
         popupOpen: false,
         popupTitle: '管理收货地址',
         num: '', // 立刻购买
         productId: '',
-        msg: {
+        address: {
           id: '',
-          userName: '',
+          name: '',
           phoneNumber: '',
-          streetName: '',
+          detailAddress: '',
           isDefault: false
         },
-        userName: '',
-        phoneNumber: '',
-        streetName: '',
+        selectedAddressId: 0, //选中的地址ID 
         userId: '',
         orderTotal: 0,
         submit: false,
@@ -177,8 +174,7 @@
         {cartList: state => state.cart.cartList},
       ),
       btnHighlight () {
-        let msg = this.msg
-        return msg.userName && msg.phoneNumber && msg.streetName
+        return this.address.name && this.address.phoneNumber && this.address.detailAddress
       },
       // 选中的总价格
       checkPrice () {
@@ -204,47 +200,23 @@
       goodsDetails (id) {
         window.open(window.location.origin + '#/goodsDetails?productId=' + id)
       },
-      _addressList () {
+      getAddressList () {
+        let that = this
         addressList().then(res => {
-          this.addList = res.data
-          if(this.addList.length > 0) {
-            this.id = res.data[0].id || '1'
-            this.userName = res.data[0].name
-            this.phoneNumber = res.data[0].phoneNumber
-            this.streetName = res.data[0].province + res.data[0].city + res.data[0].region + res.data[0].detailAddress
-          }
-        })
+          this.addressList = res.data
 
-        // addressList({userId: this.userId}).then(res => {
-        //   let data = res.result
-        //   if (data.length) {
-        //     this.addList = data
-        //     this.addressId = data[0].addressId || '1'
-        //     this.userName = data[0].userName
-        //     this.tel = data[0].tel
-        //     this.streetName = data[0].streetName
-        //   } else {
-        //     this.addList = []
-        //   }
-        // })
-      },
-      _addressUpdate (params) {
-        addressUpdate(params).then(res => {
-          this._addressList()
-        })
-      },
-      _addressAdd (params) {
-        addressAdd(params).then(res => {
-          if (res.success === true) {
-            this._addressList()
-          } else {
-            this.message(res.message)
+          // 以选择地址Id
+          this.addressList.forEach( address => {
+            if(address.defaultStatus == 1){
+              that.selectedAddressId = address.id
+            }
+          })
+
+          // 如果没有默认选中地址，默认第一个是选中地址
+          if(this.addressList.length > 0 && that.selectedAddressId == 0){
+             that.selectedAddressId = this.addressList[0].id
           }
-        })
-      },
-      _addressDel (params) {
-        addressDel(params).then(res => {
-          this._addressList()
+
         })
       },
       // 提交订单后跳转付款页面
@@ -270,10 +242,10 @@
           }
         }
         let params = {
-          userId: this.userId,
-          phoneNumber: this.phoneNumber,
-          userName: this.userName,
-          streetName: this.streetName,
+          // userId: this.userId,
+          // phoneNumber: this.phoneNumber,
+          // userName: this.userName,
+          // streetName: this.streetName,
           goodsList: array,
           orderTotal: this.orderTotal
         }
@@ -298,44 +270,47 @@
         })
       },
       // 选择地址
-      chooseAddress (id, userName, phoneNumber, streetName) {
-        this.id = id
-        this.userName = userName
-        this.phoneNumber = phoneNumber
-        this.streetName = streetName
+      chooseAddress (id) {
+        this.selectedAddressId = id
+      },
+      addAddress() {
+        this.popupOpen = true
+        this.popupTitle = '新增收货地址'
+        this.address.name = ''
+        this.address.phoneNumber = ''
+        this.address.detailAddress = ''
+        this.address.defaultStatus = 0
+        this.address.id = ''
       },
       // 修改
-      update (item) {
+      updateAddress (item) {
         this.popupOpen = true
-        if (item) {
-          this.popupTitle = '管理收货地址'
-          this.msg.userName = item.userName
-          this.msg.phoneNumber = item.phoneNumber
-          this.msg.streetName = item.streetName
-          this.msg.isDefault = item.isDefault
-          this.msg.id = item.id
-        } else {
-          this.popupTitle = '新增收货地址'
-          this.msg.userName = ''
-          this.msg.phoneNumber = ''
-          this.msg.streetName = ''
-          this.msg.isDefault = false
-          this.msg.id = ''
-        }
-      },
-      // 保存
-      save (p) {
-        this.popupOpen = false
-        if (p.id) {
-          this._addressUpdate(p)
-        } else {
-          delete p.id
-          this._addressAdd(p)
-        }
+        this.popupTitle = '管理收货地址'
+        this.address.name = item.name
+        this.address.phoneNumber = item.phoneNumber
+        this.address.detailAddress = item.detailAddress
+        this.address.defaultStatus = item.defaultStatus
+        this.address.id = item.id
       },
       // 删除
-      del (id) {
-        this._addressDel({id})
+      delAddress (id) {
+        addressRemove([id]).then(res => {
+          this.getAddressList()
+        })
+      },
+      // 保存
+      saveAddress (address) {
+        this.popupOpen = false
+        if (address.id) {
+          addressUpdate(address).then(res => {
+            this.getAddressList()
+          })
+        } else {
+          delete address.id
+          addressAdd(address).then(res => {
+            this.getAddressList()
+          })
+        }
       },
       _productDet (productId) {
         productDet({params: {productId}}).then(res => {
@@ -359,7 +334,7 @@
         this.INIT_CART_ITEMS()
       }
 
-      this._addressList()
+      this.getAddressList()
     },
     components: {
       YShelf,
