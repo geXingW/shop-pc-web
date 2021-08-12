@@ -6,7 +6,7 @@ import VueLazyload from 'vue-lazyload'
 import infiniteScroll from 'vue-infinite-scroll'
 import VueCookie from 'vue-cookie'
 import { getInfo } from './api/auth'
-import { Button, Pagination, Checkbox, Icon, Autocomplete, Loading, Message, Notification, Steps, Step, Table, TableColumn, Input, Dialog, Select, Option } from 'element-ui'
+import { Button, Pagination, Checkbox, Icon, Autocomplete, Loading, Message, Notification, Steps, Step, Table, TableColumn, Input, Dialog, Select, Option, Cascader } from 'element-ui'
 import { getStore } from '/utils/storage'
 import VueContentPlaceholders from 'vue-content-placeholders'
 Vue.use(VueContentPlaceholders)
@@ -35,6 +35,7 @@ Vue.use(VueLazyload, {
   loading: '/static/images/load.gif'
   // attempt: 1
 })
+Vue.use(Cascader)
 Vue.config.productionTip = false
 const whiteList = ['/home', '/goods', '/login', '/register', '/goodsDetails', '/thanks', '/search', '/refreshsearch', '/refreshgoods'] // 不需要登陆的页面
 router.beforeEach(function (to, from, next) {

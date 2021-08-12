@@ -30,3 +30,10 @@ export function remove (ids) {
     data: ids
   })
 }
+
+export function cityTree() {
+  return request({
+    url: '/recv-address/city-tree',
+    method: 'get'
+  })
+}

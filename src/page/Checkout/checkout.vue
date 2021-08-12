@@ -119,7 +119,12 @@
             <input type="number" placeholder="手机号码" v-model="address.phoneNumber">
           </div>
           <div>
-            <input type="text" placeholder="收货地址" v-model="address.detailAddress">
+            <el-cascader :options="cityTreeData" 
+            placeholder="选择城市" :props="cityTreeProps" v-model="address.cityIds">
+            </el-cascader>
+          </div>
+          <div>
+            <input type="text" placeholder="详细地址" v-model="address.detailAddress">
           </div>
           <div>
             <el-checkbox class="auto-login" v-model="address.defaultStatus">设为默认</el-checkbox>
@@ -127,7 +132,7 @@
           <y-button text='保存'
                     class="btn"
                     :classStyle="btnHighlight?'main-btn':'disabled-btn'"
-                    @btnClick="saveAddress({ id: address.id, name: address.name, phoneNumber: address.phoneNumber, detailAddress: address.detailAddress, defaultStatus: address.defaultStatus })">
+                    @btnClick="saveAddress(address)">
           </y-button>
         </div>
       </y-popup>
@@ -136,7 +141,7 @@
   </div>
 </template>
 <script>
-  import { list as addressList, add as addressAdd, update as addressUpdate, remove as addressRemove } from '@/api/address'
+  import { list as addressList, add as addressAdd, update as addressUpdate, remove as addressRemove, cityTree } from '@/api/address'
   import YShelf from '/components/shelf'
   import YButton from '/components/YButton'
   import YPopup from '/components/popup'
@@ -160,13 +165,19 @@
           name: '',
           phoneNumber: '',
           detailAddress: '',
-          isDefault: false
+          isDefault: false,
+          cityIds: []
         },
         selectedAddressId: 0, //选中的地址ID 
         userId: '',
         orderTotal: 0,
         submit: false,
-        submitOrder: '提交订单'
+        submitOrder: '提交订单',
+        cityTreeData: [],
+        cityTreeProps: {
+          value: 'name',
+          label: 'name'
+        }
       }
     },
     computed: {
@@ -210,6 +221,8 @@
             if(address.defaultStatus == 1){
               that.selectedAddressId = address.id
             }
+
+            address.cityIds = [address.province, address.city, address.region]
           })
 
           // 如果没有默认选中地址，默认第一个是选中地址
@@ -280,6 +293,7 @@
         this.address.phoneNumber = ''
         this.address.detailAddress = ''
         this.address.defaultStatus = 0
+        this.address.cityIds = []
         this.address.id = ''
       },
       // 修改
@@ -290,6 +304,7 @@
         this.address.phoneNumber = item.phoneNumber
         this.address.detailAddress = item.detailAddress
         this.address.defaultStatus = item.defaultStatus
+        this.address.cityIds = item.cityIds
         this.address.id = item.id
       },
       // 删除
@@ -301,6 +316,11 @@
       // 保存
       saveAddress (address) {
         this.popupOpen = false
+
+        address.province = address.cityIds[0] || ""
+        address.city = address.cityIds[1] || ""
+        address.region = address.cityIds[2] || ""
+
         if (address.id) {
           addressUpdate(address).then(res => {
             this.getAddressList()
@@ -321,6 +341,11 @@
           item.productPrice = item.salePrice
           this.cartList.push(item)
         })
+      },
+      getCityTree () {
+        cityTree().then( ({ data }) => {
+          this.cityTreeData = data
+        })
       }
     },
     created () {
@@ -335,6 +360,9 @@
       }
 
       this.getAddressList()
+
+      // 获取地址城市列表
+      this.getCityTree()
     },
     components: {
       YShelf,
@@ -346,6 +374,14 @@
   }
 </script>
 <style lang="scss" rel="stylesheet/scss" scoped>
+  .el-cascader {
+    width: 100%; 
+    display: block; 
+
+    .el-input input {
+      height: 50px; 
+    }
+  }
   // 收货地址
   .address-item-list {
     padding: 30px 13px 0;
@@ -653,6 +689,4 @@
     padding-top: 4px;
     line-height: 17px;
   }
-
-
 </style>
