@@ -127,7 +127,7 @@
             <input type="text" placeholder="详细地址" v-model="address.detailAddress">
           </div>
           <div>
-            <el-checkbox class="auto-login" v-model="address.defaultStatus">设为默认</el-checkbox>
+            <el-checkbox class="auto-login" :true-label="1" :false-label="0" v-model="address.defaultStatus">设为默认</el-checkbox>
           </div>
           <y-button text='保存'
                     class="btn"
@@ -165,7 +165,7 @@
           name: '',
           phoneNumber: '',
           detailAddress: '',
-          isDefault: false,
+          defaultStatus: 0,
           cityIds: []
         },
         selectedAddressId: 0, //选中的地址ID 
@@ -237,7 +237,7 @@
         this.submitOrder = '提交订单中...'
         this.submit = true
         var array = []
-        if (this.id === '0') {
+        if (this.selectedAddressId === '0') {
           this.message('请选择收货地址')
           this.submitOrder = '提交订单'
           this.submit = false
@@ -259,6 +259,7 @@
           // phoneNumber: this.phoneNumber,
           // userName: this.userName,
           // streetName: this.streetName,
+          addressId: this.selectedAddressId,
           goodsList: array,
           orderTotal: this.orderTotal
         }
