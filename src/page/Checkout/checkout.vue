@@ -142,6 +142,7 @@
 </template>
 <script>
   import { list as addressList, add as addressAdd, update as addressUpdate, remove as addressRemove, cityTree } from '@/api/address'
+  import { list, show, submit, update, remove } from '@/api/order'
   import YShelf from '/components/shelf'
   import YButton from '/components/YButton'
   import YPopup from '/components/popup'
@@ -197,6 +198,9 @@
         })
         this.orderTotal = totalPrice
         return totalPrice
+      },
+      selectedAddress () {
+       return this.addressList.find(address => address.id == this.selectedAddressId) 
       }
     },
     methods: {
@@ -236,7 +240,6 @@
       _submitOrder () {
         this.submitOrder = '提交订单中...'
         this.submit = true
-        var array = []
         if (this.selectedAddressId === '0') {
           this.message('请选择收货地址')
           this.submitOrder = '提交订单'
@@ -249,28 +252,42 @@
           this.submit = false
           return
         }
+
+        // 订单商品信息
+        let orderItems = []
         for (var i = 0; i < this.cartList.length; i++) {
-          if (this.cartList[i].checked === '1') {
-            array.push(this.cartList[i])
+          if (this.cartList[i].checked === 1) {
+            orderItems.push( this.cartList[i] )
           }
-        }
+        }        
+
         let params = {
-          // userId: this.userId,
-          // phoneNumber: this.phoneNumber,
-          // userName: this.userName,
-          // streetName: this.streetName,
-          addressId: this.selectedAddressId,
-          goodsList: array,
-          orderTotal: this.orderTotal
+          // 地址信息
+          recvAddress: {
+            recvAddressId: this.selectedAddressId,
+            recvName: this.selectedAddress.name,
+            recvPhone: this.selectedAddress.phoneNumber,
+            recvPostCode: this.selectedAddress.postCode,
+            recvProvince: this.selectedAddress.province,
+            recvCity: this.selectedAddress.city,
+            recvRegion: this.selectedAddress.region,
+            recvDetailAddress: this.selectedAddress.detailAddress,
+          },
+
+          // 订单商品信息
+          orderItems,
         }
-        submitOrder(params).then(res => {
-          if (res.success === true) {
-            this.payment(res.result)
-          } else {
-            this.message(res.message)
-            this.submitOrder = '提交订单'
-            this.submit = false
+
+        // this.submit = false
+        // this.submitOrder = '提交订单'
+        // console.log(params)
+        submit(params).then( ({data: orderId}) => {
+          if(orderId > 0){
+            this.payment(orderId)
           }
+
+          this.submitOrder = '提交订单'
+          this.submit = false
         })
       },
       // 付款
