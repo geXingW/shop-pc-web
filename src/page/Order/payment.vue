@@ -9,25 +9,20 @@
           <p class="payment-detail" style="color:red">请仔细填写捐赠信息，避免系统审核失败无法在捐赠名单中显示您的数据</p>
         </div>
         <div class="pay-info">
-          <span style="color:red">*</span> 昵称：<el-input v-model="nickName" placeholder="请输入您的昵称" @change="checkValid" :maxlength="maxLength" class="input"></el-input><br>
-          <span style="color:red">*</span> 捐赠金额：<el-select class="money-select" v-model="moneySelect" placeholder="请选择支付金额" @change="changeSelect">
-            <el-option label="￥0.10 我是穷逼" value="0.10"></el-option>
-            <el-option label="￥1.00 支付测试" value="1.00"></el-option>
-            <el-option label="￥5.00 感谢捐赠" value="5.00"></el-option>
-            <el-option label="￥10.00 感谢大佬" value="10.00"></el-option>
-            <el-option label="自定义 随意撒币" value="custom"></el-option>
-          </el-select><br>
-          <div v-if="moneySelect === 'custom'"><span style="color:red">*</span> 输入金额：<el-input v-model="money" placeholder="请输入捐赠金额(最多2位小数，不得低于0.1元)" @change="checkValid" :maxlength="maxLength" class="input" style="margin-left:10px"></el-input><br></div>
-          <span style="color:red">*</span> 通知邮箱：<el-input v-model="email" placeholder="支付审核结果将以邮件方式发送至您的邮箱" @change="checkValid" :maxlength="maxLength" class="input" style="margin-left:10px"></el-input><br>
-          &nbsp;&nbsp; 留言：<el-input v-model="info" placeholder="请输入您的留言内容" :maxlength="maxLength" class="input"></el-input>
         </div>
         <!--支付方式-->
         <div class="pay-type">
           <div class="p-title">支付方式</div>
           <div class="pay-item">
-            <div :class="{active:payType==1}" @click="payType=1"><img src="/static/images/alipay@2x.png" alt=""></div>
-            <div :class="{active:payType==2}" @click="payType=2"><img src="/static/images/weixinpay@2x.png" alt=""></div>
-            <div :class="{active:payType==3}" @click="payType=3"><img src="/static/images/qqpay.png" alt=""></div>
+            <div :class="{active: payment.payType == 1}" @click="payment.payType = 1">
+              <img src="/static/images/alipay@2x.png" alt="">
+            </div>
+            <div :class="{active: payment.payType == 2}" @click="payment.payType = 2">
+              <img src="/static/images/weixinpay@2x.png" alt="">
+            </div>
+            <div :class="{active: payment.payType == 3}" @click="payment.payType = 3">
+              <img src="/static/images/qqpay.png" alt="">
+            </div>
           </div>
         </div>
 
@@ -37,13 +32,13 @@
               <span>
                 订单金额：
               </span>
-              <em><span>¥</span>{{orderTotal.toFixed(2)}}</em>
+              <em><span>¥</span>{{ order.totalAmount.toFixed(2) }}</em>
               <span>
                 实际应付金额：
               </span>
-              <em><span>¥</span>{{money}}</em>
-              <y-button :text="payNow"
-                        :classStyle="submit?'main-btn':'disabled-btn'"
+              <em><span>¥</span>{{ order.totalAmount.toFixed(2) }}</em>
+              <y-button :text="payment.payText"
+                        :classStyle="payment.submit?'main-btn':'disabled-btn'"
                         style="width: 120px;height: 40px;font-size: 16px;line-height: 38px"
                         @btnClick="paySuc()"
               ></y-button>
@@ -112,23 +107,11 @@
         order: {},
         orderItems: [],
         recvAddress: {},
-        payType: 1,
-        addList: {},
-        cartList: [],
-        addressId: 0,
-        productId: '',
-        num: '',
-        userId: '',
-        orderTotal: 0,
-        userName: '',
-        tel: '',
-        streetName: '',
-        payNow: '立刻支付',
-        submit: false,
-        nickName: '',
-        money: '1.00',
-        info: '',
-        email: '',
+        payment: {
+          payText: '立刻支付',
+          payType: 0,
+          submit: false,
+        },
         orderId: '',
         type: '',
         moneySelect: '1.00',
@@ -150,10 +133,10 @@
     },
     methods: {
       checkValid () {
-        if (this.nickName !== '' && this.money !== '' && this.isMoney(this.money) && this.email !== '' && this.isEmail(this.email)) {
-          this.submit = true
+        if (this.order.totalAmount > 0 && this.payType != 0 && this.isMoney(this.order.totalAmount)) {
+          this.payment.submit = true
         } else {
-          this.submit = false
+          this.payment.submit = false
         }
       },
       messageFail (m) {
@@ -162,12 +145,6 @@
         })
       },
       changeSelect (v) {
-        if (v !== 'custom') {
-          this.money = v
-        } else {
-          this.isCustom = true
-          this.money = ''
-        }
         this.checkValid()
       },
       goodsDetails (id) {
@@ -192,8 +169,8 @@
         })
       },
       paySuc () {
-        this.payNow = '支付中...'
-        this.submit = false
+        this.payment.payText = '支付中...'
+        this.payment.submit = false
         if (this.payType === 1) {
           this.type = 'Alipay'
         } else if (this.payType === 2) {
@@ -204,12 +181,8 @@
           this.type = '其它'
         }
         payMent({
-          nickName: this.nickName,
-          money: this.money,
-          info: this.info,
-          email: this.email,
           orderId: this.orderId,
-          userId: this.userId,
+          userId: this.order.memberId,
           payType: this.type
         }).then(res => {
           if (res.success === true) {
@@ -226,8 +199,8 @@
               this.$router.push({path: '/order/alipay'})
             }
           } else {
-            this.payNow = '立刻支付'
-            this.submit = true
+            this.payment.payText = '立刻支付'
+            this.payment.submit = true
             this.messageFail(res.message)
           }
         })
