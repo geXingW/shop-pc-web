@@ -142,7 +142,7 @@
 </template>
 <script>
   import { list as addressList, add as addressAdd, update as addressUpdate, remove as addressRemove, cityTree } from '@/api/address'
-  import { list, show, submit, update, remove } from '@/api/order'
+  import { list, detail, submit, update, remove } from '@/api/order'
   import YShelf from '/components/shelf'
   import YButton from '/components/YButton'
   import YPopup from '/components/popup'

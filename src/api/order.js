@@ -7,9 +7,9 @@ export function list() {
   })
 }
 
-export function show(id) {
+export function detail(id) {
   return request({
-    url: `/order/{id}`,
+    url: '/order/' + id,
     method: 'get'
   })
 }

@@ -57,9 +57,9 @@
     <div class="p-msg w">
       <div class="confirm-detail">
         <div class="info-title">收货信息</div>
-        <p class="info-detail">姓名：{{userName}}</p>
-        <p class="info-detail">联系电话：{{tel}}</p>
-        <p class="info-detail">详细地址：{{streetName}}</p></div>
+        <p class="info-detail">姓名：{{ recvAddress.recvName }}</p>
+        <p class="info-detail">联系电话：{{ recvAddress.recvPhone }}</p>
+        <p class="info-detail">详细地址：{{ recvAddress.recvDetailAddress }}</p></div>
     </div>
     <div class="confirm-table-title">
       <span class="name">商品信息</span>
@@ -71,17 +71,17 @@
     </div>
     <!--商品-->
     <div class="confirm-goods-table">
-      <div class="cart-items" v-for="(item,i) in cartList" :key="i">
+      <div class="cart-items" v-for="(item,i) in orderItems" :key="i">
         <div class="name">
           <div class="name-cell ellipsis">
-            <a @click="goodsDetails(item.productId)" title="" target="_blank">{{item.productName}}</a>
+            <a @click="goodsDetails(item.itemId)" title="" target="_blank">{{ item.itemName }}</a>
           </div>
         </div>
         <div class="n-b">
-          <div class="price">¥ {{item.salePrice}}</div>
-          <div class="goods-num">{{item.productNum}}</div>
+          <div class="price">¥ {{ item.itemPrice }}</div>
+          <div class="goods-num">{{ item.itemQuantity }}</div>
           <div class="subtotal">
-            <div class="subtotal-cell"> ¥ {{item.salePrice * item.productNum}}<br></div>
+            <div class="subtotal-cell"> ¥ {{ item.itemAmount }}<br></div>
           </div>
         </div>
       </div>
@@ -89,9 +89,14 @@
     <!--合计-->
     <div class="order-discount-line">
       <p style="font-size: 14px;font-weight: bolder;"> <span style="padding-right:47px">商品总计：</span>
-        <span style="font-size: 16px;font-weight: 500;line-height: 32px;">¥ {{orderTotal}}</span>
+        <span style="font-size: 16px;font-weight: 500;line-height: 32px;">
+        ¥ {{ order.itemAmount || 0.00 }}
+        </span>
       </p>
-      <p><span style="padding-right:30px">运费：</span><span style="font-weight: 700;">+ ¥ 0.00</span></p>
+      <p>
+        <span style="padding-right:30px">运费：</span>
+        <span style="font-weight: 700;">+ ¥ {{ order.freightAmount || 0.00 }}</span>
+      </p>
     </div>
   </div>
 </template>
@@ -100,9 +105,13 @@
   import YButton from '/components/YButton'
   import { getOrderDet, payMent } from '/api/goods'
   import { getStore, setStore } from '/utils/storage'
+  import { detail } from '@/api/order'
   export default {
     data () {
       return {
+        order: {},
+        orderItems: [],
+        recvAddress: {},
         payType: 1,
         addList: {},
         cartList: [],
@@ -165,17 +174,21 @@
         window.open(window.location.origin + '#/goodsDetails?productId=' + id)
       },
       _getOrderDet (orderId) {
-        let params = {
-          params: {
-            orderId: this.orderId
-          }
-        }
-        getOrderDet(params).then(res => {
-          this.cartList = res.result.goodsList
-          this.userName = res.result.addressInfo.userName
-          this.tel = res.result.addressInfo.tel
-          this.streetName = res.result.addressInfo.streetName
-          this.orderTotal = res.result.orderTotal
+        // let params = {
+        //   params: {
+        //     orderId: this.orderId
+        //   }
+        // }
+        detail(orderId).then( ({ data }) => {
+          // this.cartList = res.result.goodsList
+          // this.userName = res.result.addressInfo.userName
+          // this.tel = res.result.addressInfo.tel
+          // this.streetName = res.result.addressInfo.streetName
+          // this.orderTotal = res.result.orderTotal
+
+          this.order = data
+          this.orderItems = data.orderItems
+          this.recvAddress = data.recvAddress
         })
       },
       paySuc () {
